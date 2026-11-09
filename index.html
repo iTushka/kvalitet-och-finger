@@ -1,0 +1,621 @@
+<title>Kvalitet och FINGER</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: a study binder — sticky module tabs on top, one module at a time, reading column ~68ch with interactive blocks inset. */
+:root{
+  --bg:#f3f6f5; --surface:#ffffff; --ink:#15232a; --muted:#5a6b70; --line:#d6e0de;
+  --accent:#1d6b5c; --accent-soft:#e1efeb; --finger:#b4772a; --finger-soft:#f6ecdd;
+  --good:#2e7d4f; --good-soft:#e3f2e8; --bad:#b0413e; --bad-soft:#f8e4e3;
+  --display:"Familjen Grotesk","Segoe UI",system-ui,sans-serif;
+  --body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1719; --surface:#172226; --ink:#e4ecea; --muted:#9aaeb0; --line:#2a3a3e;
+  --accent:#5fbfa8; --accent-soft:#1a3530; --finger:#e0a85c; --finger-soft:#3a2c1a;
+  --good:#6cc492; --good-soft:#173324; --bad:#e58a86; --bad-soft:#3b1f1e; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1719; --surface:#172226; --ink:#e4ecea; --muted:#9aaeb0; --line:#2a3a3e;
+  --accent:#5fbfa8; --accent-soft:#1a3530; --finger:#e0a85c; --finger-soft:#3a2c1a;
+  --good:#6cc492; --good-soft:#173324; --bad:#e58a86; --bad-soft:#3b1f1e; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.wrap{max-width:860px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{padding-block:32px 20px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;line-height:1.2;margin:0}
+h1{font-size:clamp(28px,5vw,40px);margin-top:6px}
+h2{font-size:26px;margin-bottom:6px}
+h3{font-size:19px;margin-bottom:6px}
+p{margin:0 0 12px;max-width:68ch}
+.lede{color:var(--muted);font-size:17px;max-width:62ch}
+.progress{display:flex;align-items:center;gap:12px;margin-top:18px;font-size:14px;color:var(--muted)}
+.bar{flex:1;height:8px;border-radius:99px;background:var(--line);overflow:hidden;max-width:320px}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .4s}
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-block:1px solid var(--line)}
+nav.tabs .wrap{display:flex;gap:4px;overflow-x:auto;padding-block:8px}
+nav.tabs button{font:600 14px var(--body);border:0;background:transparent;color:var(--muted);padding:8px 12px;border-radius:8px;cursor:pointer;white-space:nowrap;display:flex;gap:8px;align-items:center}
+nav.tabs button[aria-selected="true"]{background:var(--accent-soft);color:var(--ink)}
+nav.tabs button .dot{width:8px;height:8px;border-radius:50%;background:var(--line)}
+nav.tabs button.done .dot{background:var(--good)}
+nav.tabs button:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+main{padding-block:28px 60px}
+section.mod{display:grid;gap:28px}
+.block{display:grid;gap:10px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.fact{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px}
+.fact b{display:block;font:700 26px var(--display);font-variant-numeric:tabular-nums;color:var(--finger)}
+.fact span{font-size:13px;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:600 14px var(--body);border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 12px;border-radius:99px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.finger .chip[aria-pressed="true"]{background:var(--finger);border-color:var(--finger)}
+.detail{border-left:3px solid var(--accent);padding:4px 0 4px 14px}
+.finger .detail{border-color:var(--finger)}
+.detail .tag{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+.cycle{width:100%;max-width:520px;height:auto;display:block;margin:0 auto}
+.cycle g{cursor:pointer}
+.cycle circle.node{fill:var(--surface);stroke:var(--line);stroke-width:2}
+.cycle g[aria-pressed="true"] circle.node{fill:var(--accent);stroke:var(--accent)}
+.cycle text{fill:var(--ink);font:600 12px var(--body);text-anchor:middle;pointer-events:none}
+.cycle g[aria-pressed="true"] text{fill:var(--surface)}
+.cycle .ring{fill:none;stroke:var(--line);stroke-width:2;stroke-dasharray:4 6}
+.cycle .center{fill:var(--muted);font:500 12px var(--body)}
+.quiz{display:grid;gap:16px}
+.q{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:10px}
+.q .opts{display:grid;gap:8px}
+.q .opts button{text-align:left;font:15px var(--body);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;cursor:pointer}
+.q .opts button:disabled{cursor:default}
+.q .opts button.right{background:var(--good-soft);border-color:var(--good)}
+.q .opts button.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.q .fb{font-size:14px;padding:10px 12px;border-radius:8px;background:var(--accent-soft)}
+.score{font-weight:600}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:8px;align-content:start}
+.card button.reveal{justify-self:start;font:600 14px var(--body);background:transparent;color:var(--accent);border:1px solid var(--accent);border-radius:8px;padding:6px 10px;cursor:pointer}
+.card ul{margin:0;padding-left:18px;font-size:15px}
+.label{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.next{justify-self:start;font:600 15px var(--body);background:var(--accent);color:var(--surface);border:0;border-radius:8px;padding:10px 16px;cursor:pointer}
+.src{font-size:14px;color:var(--muted)}
+.src a{color:var(--accent)}
+.note{font-size:14px;color:var(--muted)}
+table{border-collapse:collapse;width:100%;font-size:15px}
+.tscroll{overflow-x:auto}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.goals{background:var(--accent-soft);border-radius:10px;padding:12px 16px}
+.goals ul{margin:4px 0 0;padding-left:18px;font-size:15px}
+.stair{display:grid;gap:8px}
+.srow{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.srow .lvl{flex:1;min-width:0}
+.mini{font:600 14px var(--body);border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:6px;padding:4px 10px;cursor:pointer}
+.mini:disabled{opacity:.35;cursor:default}
+select{font:15px var(--body);padding:6px 8px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);max-width:100%}
+select.right{border-color:var(--good);background:var(--good-soft)}
+select.wrong{border-color:var(--bad);background:var(--bad-soft)}
+label.plan{display:flex;gap:10px;align-items:flex-start;font-size:15px;cursor:pointer}
+label.plan input{margin-top:5px;accent-color:var(--accent)}
+.cert{border:2px solid var(--accent);border-radius:12px;padding:18px;background:var(--surface)}
+figure{margin:0;display:grid;gap:8px;justify-items:center}
+figure svg{width:100%;height:auto;max-width:660px;display:block}
+figcaption{font-size:14px;color:var(--muted);max-width:62ch;text-align:center}
+.f-acc{fill:var(--accent-soft);stroke:var(--accent);stroke-width:2}
+.f-sur{fill:var(--surface);stroke:var(--line);stroke-width:2}
+.f-fin{fill:var(--finger-soft);stroke:var(--finger);stroke-width:2}
+.f-ink{fill:var(--ink)}
+.f-solid{fill:var(--accent);stroke:var(--accent);stroke-width:2}
+.f-bar{fill:var(--finger)}
+.pd-a{fill:var(--accent-soft);stroke:var(--bg);stroke-width:5}
+.pd-b{fill:var(--finger-soft);stroke:var(--bg);stroke-width:5}
+.t{fill:var(--ink);font-family:var(--body);font-size:14px}
+.t-s{fill:var(--muted);font-size:12.5px}
+.t-sm{font-size:13px}
+.t-b{font-weight:700}
+.t-big{font-size:20px;font-family:var(--display)}
+.t-inv{fill:var(--bg)}
+.ln{stroke:var(--muted);stroke-width:2;fill:none}
+.ln-d{stroke:var(--accent);stroke-width:2;fill:none;stroke-dasharray:5 5}
+.ring-band{fill:none;stroke:var(--accent-soft);stroke-width:22}
+.mk{fill:var(--muted)}
+.gloss{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.gloss .card{gap:4px}
+.gloss .term{font:700 16px var(--display)}
+.gloss .think{font-size:14px;color:var(--muted)}
+.gloss .think b{color:var(--accent);font-weight:600}
+.summary{border-left:4px solid var(--accent);background:var(--surface);border-radius:0 10px 10px 0;padding:12px 16px}
+.legend{margin:0;padding-left:22px;font-size:14px;display:grid;gap:4px;justify-self:start}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mk"/></marker>
+</defs></svg>
+<script>
+function fig(svg,cap){const f=document.createElement('figure');f.innerHTML=svg+(cap?'<figcaption>'+cap+'</figcaption>':'');return f}
+function svgHouse(){return '<svg viewBox="0 0 640 372" role="img" aria-label="Kvalitetshuset: grund, förbättringsarbete, tre pelare och tak">'+
+'<polygon points="50,125 320,24 590,125" class="f-acc"/>'+
+'<text x="320" y="88" class="t t-b" text-anchor="middle">Mål: god kvalitet för brukaren</text>'+
+'<text x="320" y="110" class="t t-s" text-anchor="middle">nämnden ansvarar</text>'+
+[['Processer','vad som görs och','i vilken ordning',80],['Rutiner','hur det görs','och av vem',260],['Ansvar','vem gör vad och','vem följer upp',440]].map(([h,a,b,x])=>
+'<rect x="'+x+'" y="135" width="120" height="140" rx="6" class="f-sur"/><text x="'+(x+60)+'" y="188" class="t t-b" text-anchor="middle">'+h+'</text><text x="'+(x+60)+'" y="212" class="t t-s" text-anchor="middle">'+a+'</text><text x="'+(x+60)+'" y="230" class="t t-s" text-anchor="middle">'+b+'</text>').join('')+
+'<rect x="50" y="284" width="540" height="36" rx="4" class="f-fin"/>'+
+'<text x="320" y="307" class="t t-sm" text-anchor="middle">Förbättringsarbete: riskanalys · egenkontroll · avvikelser · klagomål</text>'+
+'<rect x="30" y="328" width="580" height="38" rx="4" class="f-ink"/>'+
+'<text x="320" y="352" class="t t-inv t-b" text-anchor="middle">Grund: SoL · LSS · HSL · SOSFS 2011:9</text></svg>'}
+function svgProcess(){const L=[['Uppdrag','tas emot'],['Genomförande-','plan upprättas'],['Insatsen','utförs'],['Uppföljning','och utvärdering']];
+let s='<svg viewBox="0 0 640 320" role="img" aria-label="En process är en kedja av aktiviteter; en rutin beskriver en av dem">'+
+'<text x="20" y="30" class="t t-s t-b">PROCESS – KEDJAN AV AKTIVITETER</text>';
+L.forEach((l,i)=>{const x=20+i*157;s+='<rect x="'+x+'" y="45" width="130" height="62" rx="8" class="'+(i===1?'f-acc':'f-sur')+'"/><text x="'+(x+65)+'" y="72" class="t t-sm t-b" text-anchor="middle">'+l[0]+'</text><text x="'+(x+65)+'" y="92" class="t t-sm" text-anchor="middle">'+l[1]+'</text>';
+ if(i<3)s+='<line x1="'+(x+132)+'" y1="76" x2="'+(x+155)+'" y2="76" class="ln" marker-end="url(#arr)"/>'});
+s+='<line x1="242" y1="109" x2="242" y2="148" class="ln-d"/>'+
+'<rect x="110" y="150" width="420" height="160" rx="8" class="f-sur"/>'+
+'<text x="130" y="178" class="t t-s t-b">RUTIN – HUR EN AKTIVITET GÖRS</text>';
+[['Vad:','genomförandeplan för en ny insats'],['Hur:','tillsammans med brukaren, i Lifecare'],['Vem:','kontaktpersonen; enhetschefen ansvarar'],['När:','vid ny insats och när behoven ändras']].forEach((r,i)=>{s+='<text x="130" y="'+(208+i*26)+'" class="t t-sm"><tspan class="t-b">'+r[0]+'</tspan> '+r[1]+'</text>'});
+return s+'</svg>'}
+function svgTimeline(){return '<svg viewBox="0 0 640 262" role="img" aria-label="Före, efter och hela tiden: riskanalys, avvikelser och egenkontroll">'+
+'<path d="M500,82 C500,30 140,30 140,82" class="ln" marker-end="url(#arr)"/>'+
+'<text x="320" y="22" class="t t-s" text-anchor="middle">Lärdomar blir bättre rutiner som förebygger nästa gång</text>'+
+'<rect x="30" y="84" width="220" height="74" rx="8" class="f-acc"/><text x="140" y="105" class="t t-s t-b" text-anchor="middle">FÖRE</text><text x="140" y="127" class="t t-b" text-anchor="middle">Riskanalys</text><text x="140" y="147" class="t t-sm" text-anchor="middle">Vad kan hända?</text>'+
+'<circle cx="320" cy="121" r="26" class="f-fin"/><text x="320" y="129" class="t t-big t-b" text-anchor="middle">!</text><text x="320" y="166" class="t t-s" text-anchor="middle">händelse</text>'+
+'<rect x="390" y="84" width="220" height="74" rx="8" class="f-acc"/><text x="500" y="105" class="t t-s t-b" text-anchor="middle">EFTER</text><text x="500" y="127" class="t t-b" text-anchor="middle">Avvikelser och klagomål</text><text x="500" y="147" class="t t-sm" text-anchor="middle">Vad hände – och varför?</text>'+
+'<line x1="30" y1="200" x2="606" y2="200" class="ln" marker-end="url(#arr)"/>'+
+[90,210,330,450,570].map(x=>'<circle cx="'+x+'" cy="200" r="7" class="f-sur"/>').join('')+
+'<text x="320" y="234" class="t t-sm" text-anchor="middle"><tspan class="t-b">Hela tiden: egenkontroll</tspan> – regelbundna kontroller att allt fungerar</text></svg>'}
+function svgPDSA(){const q=[['M180,180 L30,180 A150,150 0 0,1 180,30 Z','pd-a','Planera','Vad vill vi','förbättra?',105,112],['M180,180 L180,30 A150,150 0 0,1 330,180 Z','pd-b','Göra','Testa i','liten skala',255,112],['M180,180 L330,180 A150,150 0 0,1 180,330 Z','pd-a','Studera','Mät och','jämför',255,238],['M180,180 L180,330 A150,150 0 0,1 30,180 Z','pd-b','Agera','Behåll, justera','eller sprid',105,238]];
+return '<svg viewBox="0 0 360 360" style="max-width:360px" role="img" aria-label="PDSA-hjulet: planera, göra, studera, agera">'+q.map(a=>'<path d="'+a[0]+'" class="'+a[1]+'"/><text x="'+a[5]+'" y="'+a[6]+'" class="t t-b" text-anchor="middle">'+a[2]+'</text><text x="'+a[5]+'" y="'+(a[6]+20)+'" class="t t-s" text-anchor="middle">'+a[3]+'</text><text x="'+a[5]+'" y="'+(a[6]+36)+'" class="t t-s" text-anchor="middle">'+a[4]+'</text>').join('')+
+'<circle cx="180" cy="180" r="30" class="f-sur"/><text x="180" y="185" class="t t-sm t-b" text-anchor="middle">PDSA</text></svg>'}
+function svgOrg(){const L=[['Nämnd','politiskt ansvar för kvaliteten'],['Förvaltningsdirektör','utformar och förvaltar systemet'],['Verksamhetschef','leder kvalitetsarbetet i sitt område'],['Enhetschef','riskanalys, egenkontroll, avvikelser'],['Medarbetare','följer rutinerna och rapporterar']];
+let s='<svg viewBox="0 0 640 330" role="img" aria-label="Ansvarsfördelning från nämnd till medarbetare">';
+L.forEach((l,i)=>{const w=260+i*60,x=320-w/2,y=16+i*62;s+='<rect x="'+x+'" y="'+y+'" width="'+w+'" height="50" rx="8" class="'+(i===0?'f-acc':'f-sur')+'"/><text x="320" y="'+(y+22)+'" class="t t-b" text-anchor="middle">'+l[0]+'</text><text x="320" y="'+(y+40)+'" class="t t-s" text-anchor="middle">'+l[1]+'</text>'});
+s+='<line x1="54" y1="24" x2="54" y2="300" class="ln" marker-end="url(#arr)"/><text transform="translate(38 162) rotate(-90)" class="t t-s" text-anchor="middle">uppdrag, mål och riktlinjer</text>'+
+'<line x1="586" y1="300" x2="586" y2="24" class="ln" marker-end="url(#arr)"/><text transform="translate(610 162) rotate(-90)" class="t t-s" text-anchor="middle">uppföljning, avvikelser, rapporter</text>';
+return s+'</svg>'}
+function svgWheel(){const c=210,r=140,M=['jan','feb','mar','apr','maj','jun','jul','aug','sep','okt','nov','dec'];
+let s='<svg viewBox="0 0 420 420" style="max-width:400px" role="img" aria-label="Exempel på kvalitetsårets årshjul"><circle cx="'+c+'" cy="'+c+'" r="'+r+'" class="ring-band"/>';
+const P=(deg,rad)=>{const a=deg*Math.PI/180;return [c+rad*Math.cos(a),c+rad*Math.sin(a)]};
+M.forEach((m,i)=>{const [x1,y1]=P(-90+i*30,r-13),[x2,y2]=P(-90+i*30,r+13);s+='<line x1="'+x1.toFixed(1)+'" y1="'+y1.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+'" stroke="var(--line)" stroke-width="2"/>';
+ const [tx,ty]=P(-90+i*30+15,r+34);s+='<text x="'+tx.toFixed(1)+'" y="'+(ty+4).toFixed(1)+'" class="t t-s" text-anchor="middle">'+m+'</text>'});
+[[ -90+1*30+12,'1'],[-90+2*30,'2'],[-90+3*30+15,'3'],[-90+9*30+15,'3']].forEach(([d,n])=>{const [x,y]=P(d,r);s+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="14" class="f-solid"/><text x="'+x.toFixed(1)+'" y="'+(y+5).toFixed(1)+'" class="t t-sm t-b t-inv" text-anchor="middle">'+n+'</text>'});
+s+='<text x="'+c+'" y="'+(c-16)+'" class="t t-b" text-anchor="middle">Löpande hela året</text><text x="'+c+'" y="'+(c+6)+'" class="t t-s" text-anchor="middle">avvikelser · synpunkter</text><text x="'+c+'" y="'+(c+24)+'" class="t t-s" text-anchor="middle">riskanalys · egenkontroll</text>';
+return s+'</svg>'}
+function svgHand(){const F=[['Kost',128,150],['Motion',178,175],['Hjärnträning',228,165],['Gemenskap',278,130]];
+let s='<svg viewBox="-20 0 420 350" style="max-width:400px" role="img" aria-label="FINGER som en hand med fem fingrar: hjärta och kärl, kost, motion, hjärnträning, gemenskap">'+
+'<g transform="rotate(38 150 262)"><rect x="-6" y="240" width="170" height="44" rx="22" class="f-fin"/><text x="48" y="267" class="t t-sm t-b" text-anchor="middle">Hjärta och kärl</text></g>';
+F.forEach(([t,x,h])=>{const top=212-h;s+='<rect x="'+x+'" y="'+top+'" width="44" height="'+(h+20)+'" rx="22" class="f-fin"/><text transform="translate('+(x+27)+' '+(top+(h+20)/2)+') rotate(-90)" class="t t-sm t-b" text-anchor="middle">'+t+'</text>'});
+s+='<rect x="118" y="200" width="214" height="130" rx="48" class="f-fin"/><text x="225" y="266" class="t t-big t-b" text-anchor="middle">FINGER</text><text x="225" y="288" class="t t-s" text-anchor="middle">allt på en gång</text>';
+return s+'</svg>'}
+function svgBars(){const D=[['Kognition totalt',25],['Exekutiva funktioner',83],['Processhastighet',150]],x0=190,k=380/150;
+let s='<svg viewBox="0 0 600 200" role="img" aria-label="FINGER-resultat: 25, 83 och 150 procent bättre">';
+[0,50,100,150].forEach(v=>{const x=x0+v*k;s+='<line x1="'+x+'" y1="18" x2="'+x+'" y2="166" stroke="var(--line)" stroke-width="1"/><text x="'+x+'" y="186" class="t t-s" text-anchor="middle">'+(v?'+'+v+' %':'0')+'</text>'});
+D.forEach(([l,v],i)=>{const y=28+i*46,w=v*k;s+='<text x="'+(x0-10)+'" y="'+(y+20)+'" class="t t-sm" text-anchor="end">'+l+'</text><rect x="'+x0+'" y="'+y+'" width="'+w.toFixed(1)+'" height="28" rx="3" class="f-bar"/>'+
+ (w>300?'<text x="'+(x0+w-8)+'" y="'+(y+19)+'" class="t t-sm t-b t-inv" text-anchor="end">+'+v+' %</text>':'<text x="'+(x0+w+8)+'" y="'+(y+19)+'" class="t t-sm t-b">+'+v+' %</text>')});
+return s+'</svg>'}
+function svgJourney(j){const H=['Upptäckt','Rapportering','Bedömning','Utredning','Åtgärd','Lärande'];
+let s='<svg viewBox="0 0 640 100" role="img" aria-label="Avvikelsens resa i sex steg"><line x1="50" y1="36" x2="590" y2="36" class="ln"/>';
+H.forEach((h,i)=>{const x=50+i*108,cl=i<j?'f-solid':i===j?'f-acc':'f-sur';s+='<circle cx="'+x+'" cy="36" r="18" class="'+cl+'"/><text x="'+x+'" y="41" class="t t-sm t-b'+(i<j?' t-inv':'')+'" text-anchor="middle">'+(i+1)+'</text><text x="'+x+'" y="80" class="t t-s" text-anchor="middle">'+h+'</text>'});
+return s+'</svg>'}
+function svgStair(){const L=[['Lag','riksdagen'],['Föreskrift','Socialstyrelsen'],['Policy','kommunfullmäktige'],['Riktlinje','nämnden'],['Rutin','förvaltning eller enhet'],['Instruktion','arbetsplatsen']];
+let s='<svg viewBox="0 0 640 300" role="img" aria-label="Styrdokumentens pyramid från lag till instruktion">';
+L.forEach((l,i)=>{const w=200+i*84,x=320-w/2,y=8+i*48;s+='<rect x="'+x+'" y="'+y+'" width="'+w+'" height="42" rx="6" class="'+(i<2?'f-acc':'f-sur')+'"/><text x="320" y="'+(y+26)+'" class="t t-sm" text-anchor="middle"><tspan class="t-b">'+l[0]+'</tspan> – '+l[1]+'</text>'});
+return s+'</svg>'}
+function svgLife(){return '<svg viewBox="0 0 640 170" role="img" aria-label="Sjukdomsprocessen kan pågå 20 till 30 år före diagnos">'+
+'<text x="320" y="24" class="t t-b" text-anchor="middle">Aldrig för tidigt att börja – aldrig för sent att bromsa</text>'+
+'<line x1="40" y1="84" x2="612" y2="84" class="ln" marker-end="url(#arr)"/>'+
+'<circle cx="100" cy="84" r="7" class="f-sur"/><text x="100" y="124" class="t t-s" text-anchor="middle">medelålder</text>'+
+'<rect x="180" y="64" width="330" height="40" rx="6" class="f-fin"/><text x="345" y="89" class="t t-sm" text-anchor="middle"><tspan class="t-b">20–30 år</tspan> av förändringar, ofta utan symtom</text>'+
+'<circle cx="530" cy="84" r="10" class="f-solid"/><text x="530" y="124" class="t t-b" text-anchor="middle">diagnos</text>'+
+'<text x="320" y="156" class="t t-s" text-anchor="middle">Livsstilen påverkar risken längs hela linjen</text></svg>'}
+function fingerKommun(){const d=document.createElement('div');d.className='block';
+d.innerHTML='<h3>Så gör andra kommuner</h3><p>Erfarenheter från Göteborgsregionens erfarenhetsutbyte och FINGER-nätverket. Klicka på en kommun.</p>';
+d.append(picker(MUNIS,'muni',c=>'<h3>'+c.t+'</h3><p>'+c.d+'</p>'));
+const g=document.createElement('div');g.className='cards';
+g.innerHTML='<div class="card"><span class="label">Framgångsfaktorer</span><ul><li>Börja med det som redan finns och hitta luckorna</li><li>Motivera: locka deltagarna till en första aktivitet – informationsblad räcker inte</li><li>Delaktighet ger effekt: de som gjorde minst hälften av aktiviteterna fick större effekt</li><li>Kommunen kan vara lots och koppla vidare till föreningar, studieförbund och vårdcentral</li><li>Testa i liten skala, följ upp och justera</li></ul></div>'+
+'<div class="card"><span class="label">Vanliga utmaningar</span><ul><li>Kontroller av hjärt- och kärlvärden är svåra att få till</li><li>Många enheter gör delar av uppdraget – svårt att knyta ihop</li><li>Många kommer till vården för sent</li><li>Aktiviteter för personer med kognitiv svikt kräver resurser</li><li>Arbetet får inte bara bli mer belastning för personalen</li></ul></div>';
+d.append(g);return d}
+function fingerMap(){state.map=state.map||{};const p=document.createElement('div');p.className='panel block';
+p.innerHTML='<h3>Övning: kartlägg en förebyggande verksamhet</h3><p>Exemplet bygger på ett typiskt kommunalt område för förebyggande och sociala insatser för äldre, som redan har många byggstenar. Markera för varje finger vilka verksamheter som bidrar. Luckorna blir synliga direkt – det är så FBHI rekommenderar att börja.</p>';
+const sum=document.createElement('p');sum.className='score';const showM=document.createElement('div');showM.hidden=true;
+const upd=()=>{const gaps=FING.filter((f,i)=>!(state.map[i]||[]).length);const touched=Object.keys(state.map).length;
+ sum.textContent=!touched?'Börja med att markera verksamheter.':gaps.length?'Luckor just nu: '+gaps.join(', ')+'.':'Alla fem fingrar har minst en verksamhet. Fundera på vilka som är tunnast.'};
+FING.forEach((f,i)=>{const row=document.createElement('div');row.className='block';row.innerHTML='<div style="font-weight:600">'+f+'</div>';const ch=document.createElement('div');ch.className='chips';
+ UNITS.forEach((u,k)=>{const b=document.createElement('button');b.type='button';b.className='chip';b.id='map-'+i+'-'+k;const on=(state.map[i]||[]).includes(k);b.setAttribute('aria-pressed',on?'true':'false');b.textContent=u;
+  b.onclick=()=>{const a=state.map[i]=state.map[i]||[];const x=a.indexOf(k);if(x>=0)a.splice(x,1);else a.push(k);b.setAttribute('aria-pressed',x>=0?'false':'true');save();upd()};ch.append(b)});
+ row.append(ch);p.append(row)});
+const btn=document.createElement('button');btn.type='button';btn.className='chip';btn.id='map-model';btn.textContent='Visa ett förslag';
+showM.innerHTML='<div class="detail"><ul style="margin:0;padding-left:18px">'+FING.map((f,i)=>'<li><b>'+f+':</b> '+FMODEL[i].map(k=>UNITS[k]).join(', ')+'</li>').join('')+'</ul><p class="note" style="margin-top:8px">Ett förslag, inte en färdig plan. Lägg märke till att koll på värden kräver samverkan med primärvården – det som flera kommuner beskriver som svårast.</p></div>';
+btn.onclick=()=>{showM.hidden=!showM.hidden;btn.textContent=showM.hidden?'Visa ett förslag':'Dölj förslaget'};
+p.append(sum,btn,showM);upd();return p}
+const GLOSS=[
+{t:'Ledningssystem',d:'Verksamhetens sätt att planera, leda, följa upp och förbättra kvaliteten.',a:'verksamhetens bruksanvisning för kvalitet.'},
+{t:'Process',d:'En kedja av aktiviteter i en bestämd ordning som skapar ett resultat.',a:'receptets steg från råvara till färdig rätt.'},
+{t:'Rutin',d:'Beskriver hur en aktivitet ska göras och vem som ansvarar.',a:'ett enskilt steg i receptet, utskrivet i detalj.'},
+{t:'Riskanalys',d:'Bedömning av vad som kan hända, hur sannolikt det är och hur allvarligt det blir.',a:'en väderprognos – du tar med paraply innan det regnar.'},
+{t:'Egenkontroll',d:'Regelbunden, planerad kontroll av den egna verksamheten.',a:'att själv ta tempen på verksamheten, med jämna mellanrum.'},
+{t:'Avvikelse',d:'En händelse som inte blev som den skulle, eller hade kunnat bli fel.',a:'en varningslampa som visar var rutinen inte höll.'},
+{t:'Lex Sarah',d:'Skyldigheten att rapportera missförhållanden inom socialtjänst och LSS.',a:'socialtjänstens larmknapp.'},
+{t:'Lex Maria',d:'Anmälan till IVO vid allvarlig vårdskada i hälso- och sjukvården, t.ex. läkemedel. MAS ansvarar i kommunen.',a:'vårdens larmknapp.'},
+{t:'Kvalitetsberättelse',d:'Årlig sammanfattning av kvalitetsarbetet: vad som gjorts, brister och utvecklingsområden.',a:'verksamhetens årsbokslut, fast för kvalitet.'},
+{t:'Ledningens genomgång',d:'Ledningens årliga bedömning av om ledningssystemet fungerar och vad som ska förbättras.',a:'den årliga servicen av hela maskinen.'},
+{t:'IVO',d:'Inspektionen för vård och omsorg – granskar att verksamheter följer lagar och föreskrifter.',a:'bilbesiktningen för vård och omsorg.'},
+{t:'MAS',d:'Medicinskt ansvarig sjuksköterska – ansvarar för patientsäkerheten i kommunens hälso- och sjukvård.',a:'kommunens patientsäkerhetsansvarige.'}
+];
+function glossary(){const p=document.createElement('div');p.className='block';p.innerHTML='<h3>Ordlista</h3><p class="note">Begreppen du behöver kunna. Läs definitionen, och använd bilden under för att komma ihåg den.</p><div class="gloss">'+
+GLOSS.map(g=>'<div class="card"><div class="term">'+g.t+'</div><div style="font-size:15px">'+g.d+'</div><div class="think"><b>Tänk:</b> '+g.a+'</div></div>').join('')+'</div>';return p}
+const SUMMARY={
+ledning:'Ledningssystemet är verksamhetens bruksanvisning för kvalitet. Det vilar på lagen och SOSFS 2011:9, byggs av processer, rutiner och tydligt ansvar, och hålls levande av förbättringsarbetet.',
+forbattring:'Riskanalys tittar framåt, avvikelser och klagomål tittar bakåt och egenkontroll kontrollerar hela tiden. Allt samlas, analyseras och blir åtgärder – och nya förändringar testas i små steg med PDSA.',
+kommun:'Nämnden äger ansvaret, cheferna driver arbetet och medarbetarna rapporterar. Året har en fast rytm av uppföljningar, och den nya socialtjänstlagen gör att förebyggande insatser också ska in i ledningssystemet.',
+finger:'FINGER kombinerar mat, motion, hjärngymnastik, gemenskap och koll på värden samtidigt. Det gav 25 % bättre kognition på två år. Kommunerna som lyckas börjar med det som redan finns, motiverar deltagarna och samverkar med primärvården och civilsamhället.'
+};
+</script>
+
+<header class="top wrap">
+  <div class="eyebrow">Fritt studiematerial · november 2026</div>
+  <h1>Kvalitet och FINGER</h1>
+  <p class="lede">En kort, interaktiv genomgång av ledningssystem för systematiskt kvalitetsarbete (SOSFS 2011:9) och FINGER-modellen, med stödbilder, praktiska övningar och kunskapstest. För dig som arbetar med eller vill in i kvalitetsarbete inom socialtjänst, LSS och äldreomsorg.</p>
+  <div class="progress"><div class="bar"><i id="bar"></i></div><span id="progtext">0 av 6 moduler klara</span></div>
+</header>
+
+<nav class="tabs" aria-label="Moduler"><div class="wrap" role="tablist" id="tabs"></div></nav>
+
+<main class="wrap" id="main"></main>
+
+<script>
+const MODS=[
+{id:'ledning',name:'1. Ledningssystemet',short:'Ledningssystem'},
+{id:'forbattring',name:'2. Förbättringsarbetet',short:'Förbättring'},
+{id:'kommun',name:'3. Så gör kommunerna',short:'Kommunerna'},
+{id:'ova',name:'4. Öva i praktiken',short:'Öva'},
+{id:'finger',name:'5. FINGER-modellen',short:'FINGER'},
+{id:'intervju',name:'6. Källor',short:'Källor'}
+];
+const GOALS={
+ledning:['förklara vad ett ledningssystem är och varför det krävs','hitta rätt kapitel i SOSFS 2011:9','skilja på process och rutin'],
+forbattring:['beskriva förbättringscykelns sex delar','välja rätt verktyg i en given situation','förklara hur PDSA används i ett pilotprojekt'],
+kommun:['beskriva hur ansvaret fördelas i en kommun','känna igen kvalitetsårets rytm','göra en nulägesbild med Socialstyrelsens checklista','förklara vad den nya socialtjänstlagen betyder för ledningssystemet'],
+ova:['följa en avvikelse från upptäckt till lärande','placera kvalitetsaktiviteter i årshjulet','ordna styrdokumenten från lag till instruktion','läsa och skissa en processkarta'],
+finger:['återge FINGER-studiens resultat','beskriva modellens komponenter och ge praktiska råd','berätta hur andra kommuner har infört modellen','kartlägga en kommuns verksamhet mot de fem fingrarna'],
+intervju:['hitta originalkällorna och läsa vidare']
+};
+const SCEN='En boende i en LSS-gruppbostad har inte fått sin kvällsmedicin. Du upptäcker det vid överlämningen till nattpersonalen. Följ händelsen genom ledningssystemet.';
+const JOURNEY=[
+{h:'Upptäckt',q:'Vad gör du först?',o:['Skriver en avvikelse i morgon när det är lugnare','Säkerställer brukarens säkerhet och kontaktar sjuksköterskan enligt läkemedelsrutinen','Ger medicinen själv utan att fråga någon'],a:1,e:'Brukarens säkerhet går före allt annat. Sjuksköterskan avgör vad som ska göras med den missade dosen.',x:'Börja alltid med brukarens säkerhet och följ rutinen. Sjuksköterskan avgör hur en missad dos hanteras.'},
+{h:'Rapportering',q:'Hur rapporterar du händelsen?',o:['Berättar för en kollega','Tar upp den på nästa APT','Rapporterar en avvikelse i avvikelsesystemet samma arbetspass'],a:2,e:'Avvikelsen ska rapporteras skriftligt utan dröjsmål, så att den kan utredas och följas upp.',x:'Muntligt försvinner. Avvikelsen ska in i systemet direkt, annars kan den inte utredas eller sammanställas.'},
+{h:'Bedömning',q:'Läkemedel ges med stöd av hälso- och sjukvårdslagen. Vilket regelverk gäller vid en allvarlig vårdskada?',o:['Lex Maria, som hanteras via MAS','Lex Sarah','Ingen anmälan behövs någonsin'],a:0,e:'Läkemedel är hälso- och sjukvård. Vid allvarlig vårdskada gäller lex Maria, och MAS ansvarar för anmälan till IVO. Lex Sarah gäller missförhållanden inom SoL och LSS.',x:'Lex Sarah gäller missförhållanden i socialtjänst och LSS. Läkemedel är hälso- och sjukvård – där gäller lex Maria via MAS.'},
+{h:'Utredning',q:'Vad är målet med utredningen?',o:['Att hitta den som gjorde fel','Att hitta orsaken i rutiner, system och arbetssätt så att det inte händer igen','Att avsluta ärendet så snabbt som möjligt'],a:1,e:'En bra utredning letar efter orsaker i systemet, inte syndabockar. Det skapar ett öppet klimat där fler rapporterar.',x:'Fokus på skuld gör att färre rapporterar. Utredningen ska hitta orsaker i rutiner och system.'},
+{h:'Åtgärd',q:'Utredningen visar att signeringslistan inte kontrolleras vid överlämning. Vilken åtgärd är bäst?',o:['Påminna personalen muntligt','Lägga in kontroll av signeringslistan i överlämningsrutinen och följa upp om tre månader','Byta personal'],a:1,e:'En åtgärd ska ändra rutinen och följas upp. Annars vet ingen om den fungerade.',x:'En påminnelse glöms. Ändra rutinen och bestäm när ni följer upp om den fungerar.'},
+{h:'Lärande',q:'Vad händer sedan med avvikelsen?',o:['Den arkiveras','Den återkopplas till personalen och tas med i sammanställningen till ledningsgruppen och kvalitetsberättelsen','Den raderas när den är åtgärdad'],a:1,e:'Återkoppling visar att rapportering lönar sig. Sammanställningen avslöjar mönster mellan enheter.',x:'Utan återkoppling och sammanställning går lärandet förlorat. Det är här kvalitetssamordnaren gör störst nytta.'}
+];
+const WHEEL=[
+{t:'Patientsäkerhetsberättelse',a:'Senast 1 mars'},
+{t:'Kvalitetsberättelse',a:'Årligen'},
+{t:'Ledningens genomgång av ledningssystemet',a:'Årligen'},
+{t:'Sammanställning av förbättringsarbetet till nämnden (Uppsala)',a:'Minst 2 ggr/år'},
+{t:'Loggkontroll i journalsystemet (VGR)',a:'Månadsvis'},
+{t:'Rapportering av avvikelser',a:'Löpande'},
+{t:'Riskanalys inför byte till Lifecare',a:'Vid förändring'}
+];
+const WOPT=['Löpande','Månadsvis','Minst 2 ggr/år','Årligen','Senast 1 mars','Vid förändring'];
+const STAIR=[
+{t:'Lag',d:'SoL och LSS – beslutas av riksdagen'},
+{t:'Föreskrift',d:'SOSFS 2011:9 – beslutas av Socialstyrelsen'},
+{t:'Policy',d:'Övergripande hållning – kommunfullmäktige'},
+{t:'Riktlinje',d:'Hur policyn ska tillämpas – nämnden'},
+{t:'Rutin',d:'Hur en aktivitet görs och vem ansvarar – förvaltning eller enhet'},
+{t:'Instruktion',d:'Steg för steg för en enskild uppgift – arbetsplatsen'}
+];
+const PROC=[
+['Planera, leda och följa upp piloten','Ledningsprocess','Projektplan och årshjul','Områdeschef, kvalitetssamordnare'],
+['Bjuda in deltagare via förebyggande hembesök och seniorträffar','Verksamhetsprocess','Rutin för inbjudan och samtycke','Enhetschef Stöd och förebyggande'],
+['Genomföra gruppträffar: kost, motion, kognition, gemenskap','Verksamhetsprocess','Programmanual','Hälsopedagog'],
+['Samverka med primärvården om hjärt-kärlhälsa','Verksamhetsprocess (samverkan)','Samverkansrutin','Kvalitetssamordnare'],
+['Mäta och rapportera resultat i Hypergene','Stödprocess','Rutin för uppföljning','Kvalitetssamordnare'],
+['Utbilda medarbetare i arbetssättet','Stödprocess','Utbildningsplan','Kvalitetssamordnare']
+];
+
+const ROLES=[
+{t:'Nämnd',d:'Ytterst ansvarig för god kvalitet och för att ledningssystemet finns. Fastställer strategier, följer upp att systemet används och säkerställer att externa utförare har ett eget ledningssystem.',s:'Uppsala, Borlänge'},
+{t:'Förvaltningsdirektör',d:'Utformar, inför och förvaltar ledningssystemet. Ansvarar för riskanalyser, uppföljning av avvikelser och klagomål, förbättringsåtgärder och regelbunden rapportering till nämnden.',s:'Uppsala, Borlänge'},
+{t:'Verksamhetschef',d:'Leder och följer upp kvalitetsarbetet i sitt område, omsätter mål och riktlinjer och kan besluta om kompletterande rutiner.',s:'Borlänge'},
+{t:'Enhetschef',d:'Planerar och följer upp det operativa kvalitetsarbetet, gör riskanalyser och egenkontroller, hanterar avvikelser och ser till att rutinerna är aktuella och kända.',s:'Uppsala, Borlänge'},
+{t:'MAS och MAR',d:'Medicinskt ansvarig sjuksköterska och medicinskt ansvarig för rehabilitering. Ansvarar för patientsäkerhet, läkemedelshantering och lex Maria inom kommunal hälso- och sjukvård.',s:'Borlänge'},
+{t:'Kvalitetsfunktion',d:'Riktlinjerna lägger inte ansvaret här, men det är kvalitetssamordnaren som i praktiken stödjer cheferna: håller ihop årshjulet, sammanställer avvikelser och klagomål, driver egenkontroller och skriver underlag till kvalitetsberättelsen. I Borlänge ägs riktlinjen av förvaltningarnas kvalitetsråd.',s:'Rollens stödfunktion'},
+{t:'Medarbetare',d:'Följer processer och rutiner, rapporterar risker, avvikelser och missförhållanden (lex Sarah) och deltar i egenkontroll och förbättringsarbete.',s:'Uppsala, Borlänge'}
+];
+const CHECK=[
+'Känner verksamheten till vilka lagar och föreskrifter som gäller och vilka krav de ställer?',
+'Är det beskrivet hur ansvaret för kvalitetsarbetet är fördelat?',
+'Finns processer, med aktiviteter och rutiner, som beskriver arbetet?',
+'Är det angett i vilka processer samverkan behövs och hur den ska gå till, internt och externt?',
+'Görs riskanalyser löpande, med bedömning av sannolikhet och konsekvens?',
+'Görs egenkontroll i tillräcklig omfattning, och kontrolleras att rutinerna följs?',
+'Tas klagomål och synpunkter emot, utreds, sammanställs och analyseras?',
+'Finns rutiner för hur personalen rapporterar händelser och hur ledningen utreder dem?',
+'Genomförs förbättringar utifrån riskanalys, egenkontroll, klagomål och rapporter?',
+'Säkerställer ledningen att personalen känner till och följer processer och rutiner?',
+'Finns rutiner för hur kvalitetsarbetet dokumenteras?'
+];
+const SKR=[
+{t:'Mål',d:'Mål för förebyggande arbete, en kunskapsbaserad, tillgänglig och jämlik socialtjänst, planering av insatser och tydligare barnperspektiv.'},
+{t:'Processer och rutiner',d:'Uppdatera eller ta fram processer för förebyggande arbete, tillgänglighet, kunskapsbaserat arbete, systematisk uppföljning och för att införa – och avveckla – metoder.'},
+{t:'Samverkan',d:'Nya samverkansparter: regioner, andra kommuner, civilsamhälle, näringsliv och myndigheter. Följ upp vad samverkan lär er.'},
+{t:'Riskanalys',d:'Analysera risker ur jämlikhetsperspektiv, inklusive grupper som inte nås, och risker med insatser som inte är kunskapsbaserade.'},
+{t:'Egenkontroll',d:'Ta med insatser utan behovsprövning, tillgänglighet, resultat och barnperspektiv.'},
+{t:'Brukare och invånare',d:'Involvera dem innan beslut och förändringar, och se till att alla grupper vet hur de lämnar synpunkter.'},
+{t:'Medarbetare',d:'Den som arbetar med nya insatser ska veta hur ledningssystemet fungerar och vilken roll de har i kvalitetsarbetet.'}
+];
+const QUIZ={
+ledning:[
+{q:'Vilka verksamheter omfattas av SOSFS 2011:9?',o:['Bara hälso- och sjukvård','Hälso- och sjukvård, tandvård, socialtjänst och verksamhet enligt LSS','Bara kommunal äldreomsorg','Bara privata utförare'],a:1,e:'Föreskriften är gemensam för hälso- och sjukvård, tandvård, socialtjänst och LSS. Det är därför samma tänk gäller i en LSS-gruppbostad och i hemtjänsten.'},
+{q:'Vad är skillnaden mellan en process och en rutin?',o:['Ingen, det är samma sak','En process är en kedja av aktiviteter; en rutin beskriver hur en aktivitet ska utföras och vem som ansvarar','En rutin är alltid politiskt beslutad','En process gäller bara IT-system'],a:1,e:'4 kap: processer identifieras och beskrivs som aktiviteter i ordning, och varje aktivitet får rutiner med tillvägagångssätt och ansvarsfördelning.'},
+{q:'Vem ansvarar för att det finns ett ledningssystem?',o:['Varje enskild medarbetare','Den som bedriver verksamheten, t.ex. nämnden eller vårdgivaren','IVO','Socialstyrelsen'],a:1,e:'3 kap lägger ansvaret på vårdgivaren eller den som bedriver socialtjänst/LSS-verksamhet. I en kommun är det nämnden, som delegerar uppgifter.'},
+{q:'Vilken lag gäller som ny socialtjänstlag sedan 1 juli 2025?',o:['SFS 2001:453','SFS 2025:400','SFS 1993:387','SFS 2010:659'],a:1,e:'Den nya socialtjänstlagen (2025:400) ersatte 2001 års lag. Senaste ändringen i SOSFS 2011:9 (HSLF-FS 2025:21) uppdaterade hänvisningarna till den.'}
+],
+forbattring:[
+{q:'En sjuksköterska ser att två boende fått fel dos. Vilket verktyg i 5 kap hör det till först?',o:['Egenkontroll','Avvikelsehantering (rapportering och utredning)','Klagomål och synpunkter','Riskanalys'],a:1,e:'En inträffad händelse som påverkat kvaliteten rapporteras och utreds som avvikelse. Inom SoL/LSS kan det också vara lex Sarah.'},
+{q:'Ni ska införa ett nytt dokumentationssystem nästa år. Vad bör ni göra innan?',o:['Egenkontroll','Riskanalys','Kvalitetsberättelse','Ingenting förrän något händer'],a:1,e:'Riskanalys är framåtblickande: vad kan gå fel, hur sannolikt är det och vad blir konsekvensen? Perfekt inför systembyten som Lifecare.'},
+{q:'Varje kvartal granskar enhetschefen tio slumpvisa genomförandeplaner. Vad är det?',o:['Egenkontroll','Riskanalys','Klagomålshantering','Personalens medverkan'],a:0,e:'Egenkontroll är systematisk uppföljning och utvärdering av den egna verksamheten, t.ex. journalgranskning, jämförelser eller kvalitetsregister.'},
+{q:'Vad rekommenderar de allmänna råden att man sammanfattar årligen?',o:['En budget','En kvalitetsberättelse','Ett personalschema','En verksamhetsplan för IVO'],a:1,e:'7 kap: kvalitetsarbetet ska dokumenteras, och de allmänna råden rekommenderar en årlig kvalitetsberättelse. I vården finns krav på patientsäkerhetsberättelse senast 1 mars.'}
+],
+kommun:[
+{q:'I Uppsalas riktlinje: hur ofta redovisas sammanställningar av förbättringsarbetet för ledningsgrupp och nämnd?',o:['Vart tredje år','Minst två gånger per år','Bara vid tillsyn från IVO','Varje vecka'],a:1,e:'Minst två gånger per år enligt årshjulet, plus en årlig kvalitetsberättelse. Lex Sarah-rapporter redovisas löpande.'},
+{q:'Vilka tre slags processer delar Uppsala in sitt arbete i?',o:['Snabba, mellan och långsamma','Styr- och ledningsprocesser, verksamhetsprocesser och stödprocesser','Akuta, planerade och övriga','Interna, externa och politiska'],a:1,e:'Ledningsprocesser styr, verksamhetsprocesser (t.ex. handläggning) skapar värde för brukaren och stödprocesser (t.ex. IT, HR) möjliggör.'},
+{q:'Vad händer i Uppsala om en utredd synpunkt visar på brister?',o:['Den arkiveras','Det upprättas en avvikelse','Den skickas till IVO direkt','Ingenting'],a:1,e:'Synpunkten blir en avvikelse, så att bristen hanteras i förbättringsarbetet och syns i sammanställningarna.'},
+{q:'Enligt SKR:s stöd för den nya socialtjänstlagen: vad ska egenkontrollen nu också omfatta?',o:['Bara ekonomi','Insatser utan behovsprövning, tillgänglighet och resultat','Bara personalens arbetstider','Ingenting nytt'],a:1,e:'Den nya lagen betonar förebyggande och lättillgängliga insatser utan behovsprövning, och de ska också följas upp i ledningssystemet. Det gäller t.ex. öppna förebyggande verksamheter som ett FINGER-program.'}
+],
+finger:[
+{q:'Hur många deltog i den ursprungliga FINGER-studien?',o:['260','1 260','12 600','126'],a:1,e:'1 260 personer i Finland, 60–77 år, med förhöjd risk för demens. Hälften fick interventionen, hälften vanliga hälsoråd.'},
+{q:'Vilka var de fem ursprungliga komponenterna?',o:['Kost, motion, kognitiv träning, sociala aktiviteter och kontroll av hjärt-kärlrisker','Kost, sömn, medicinering, terapi och vila','Motion, yoga, meditation, läsning och dans','Hemtjänst, dagverksamhet, boende, anhörigstöd och larm'],a:0,e:'De fem områdena. Senare har hörsel, syn, munhälsa, stress och sömn lagts till i hur modellen beskrivs.'},
+{q:'Hur mycket bättre presterade interventionsgruppen totalt på de kognitiva testerna efter två år?',o:['5 %','25 %','83 %','150 %'],a:1,e:'25 % högre totalt. Exekutiva funktioner +83 % och processhastighet +150 %. Huvudanalysen visade ingen effekt på minnet.'},
+{q:'Vad är kärnan i FINGER som arbetssätt i kommunen?',o:['En ny medicin','Flera livsstilsområden samtidigt, i grupp och över tid','Ett enskilt träningspass','Ett digitalt minnestest'],a:1,e:'Styrkan är att flera områden kombineras samtidigt (multidomän) under lång tid, ofta i grupp där det sociala är en del av effekten.'},
+{q:'Hur stor andel av demensfallen kopplas till påverkbara faktorer enligt Lancet-kommissionen 2024?',o:['Cirka 5 %','Cirka 20 %','Cirka 45 %','Cirka 90 %'],a:2,e:'Omkring 45 %. Det är huvudargumentet för förebyggande arbete i kommunerna.'},
+{q:'Vad säger erfarenheterna från kommunerna om hur man bäst startar?',o:['Bygga allt nytt från grunden','Börja med det som redan finns, hitta luckorna och samverka','Vänta tills alla har en diagnos','Bara dela ut informationsblad'],a:1,e:'FBHI rekommenderar att utgå från befintlig verksamhet. Lund visar att informationsblad inte räcker – personalen behöver locka deltagarna till en första aktivitet.'}
+]
+};
+const CHAPTERS=[
+{k:'1 kap',t:'Tillämpning',d:'Gäller den som bedriver hälso- och sjukvård, tandvård, socialtjänst enligt socialtjänstlagen (2025:400) och verksamhet enligt LSS, samt det systematiska patientsäkerhetsarbetet.'},
+{k:'2 kap',t:'Definitioner',d:'Begrepp som ledningssystem, process, kvalitet, egenkontroll och vårdskada. Att kunna orden gör det lättare att prata kvalitet med chefer.'},
+{k:'3 kap',t:'Ansvar',d:'Den som bedriver verksamheten ska ha ett ledningssystem för att planera, leda, kontrollera, följa upp, utvärdera och förbättra. Uppgifterna ska vara fördelade och tydliga.'},
+{k:'4 kap',t:'Uppbyggnad',d:'Anpassa efter verksamheten. Identifiera, beskriv och fastställ processer. Varje aktivitet får rutiner med tillvägagångssätt och ansvar. Samverkan (inom och utanför organisationen) ska regleras i processerna.'},
+{k:'5 kap',t:'Förbättringsarbete',d:'Riskanalys, egenkontroll, klagomål och synpunkter, rapportering och utredning av avvikelser, sammanställning och analys, och åtgärder. Det är motorn i ledningssystemet – modul 2 går igenom den.'},
+{k:'6 kap',t:'Personalens medverkan',d:'Personalen ska arbeta enligt processer och rutiner och bidra till kvaliteten, t.ex. genom att rapportera missförhållanden (lex Sarah i SoL och LSS).'},
+{k:'7 kap',t:'Dokumentation',d:'Kvalitetsarbetet ska dokumenteras. Allmänna råd: en årlig kvalitetsberättelse. Vården: patientsäkerhetsberättelse senast 1 mars.'}
+];
+const CYCLE=[
+{t:'Riskanalys',d:'Framåtblickande. Vad kan hända som påverkar kvaliteten? Bedöm sannolikhet och konsekvens, och åtgärda innan det händer.',ex:'Inför Lifecare-bytet: vad händer med pågående genomförandeplaner vid migreringen?'},
+{t:'Egenkontroll',d:'Systematisk uppföljning av den egna verksamheten, i lämplig frekvens.',ex:'Kvartalsvis granskning av dokumentation, brukarundersökningar, nyckeltal i Stratsys eller Hypergene.'},
+{t:'Klagomål och synpunkter',d:'Ta emot och utred klagomål från brukare, närstående och andra.',ex:'En anhörig hör av sig om att besök ofta blir sena.'},
+{t:'Avvikelser',d:'Rapportera och utred händelser som inträffat. I SoL/LSS ingår lex Sarah för missförhållanden.',ex:'Läkemedel gavs inte enligt ordination.'},
+{t:'Sammanställ och analysera',d:'Lägg ihop avvikelser och klagomål och leta mönster, så att enstaka händelser blir lärande.',ex:'Fem avvikelser på helger – samma orsak?'},
+{t:'Åtgärder',d:'Vidta åtgärder och förbättra processer och rutiner. Följ sedan upp att de fungerar – och cykeln börjar om.',ex:'Ny överlämningsrutin på helger, utvärderas om tre månader.'}
+];
+const FCOMP=[
+{t:'Hälsosam mat',d:'Utgå från de nordiska näringsrekommendationerna. Fokus på matmönstret som helhet, inte på enskilda superlivsmedel.',r:['Mer: frukt, grönt, fisk, baljväxter, nötter och rapsolja','Mindre: salt, socker, rött kött, chark och alkohol'],km:'Kommunens restauranger och matlådor, matprat på seniorträffar, hälsopedagog.'},
+{t:'Fysisk aktivitet',d:'Kondition, styrka och balans. I den finska CAIDE-studien hade de som motionerade regelbundet i medelåldern ungefär halverad risk för kognitiv svikt 20 år senare.',r:['150–300 minuter måttlig aktivitet per vecka','Styrka och balans minst två gånger per vecka','Mikrovanor: gå av en hållplats tidigare, rörelsepauser'],km:'Gruppträning i träffpunkter, promenadgrupper, samarbete med t.ex. Friskis & Svettis.'},
+{t:'Hjärngymnastik',d:'Varierade uppgifter som gradvis blir svårare. I FINGER-studien tränades arbetsminne, långtidsminne, uppmärksamhet och processhastighet med ett datorprogram.',r:['Korsord, sudoku, nytt språk eller instrument','Öva på att memorera, t.ex. inköpslistan'],km:'Digitala tjänster, studiecirklar med studieförbund, hjärngympa i dagverksamhet.'},
+{t:'Sociala aktiviteter',d:'Nära relationer och att känna sig delaktig. Upplevd ensamhet är en riskfaktor. FBHI räknar också sömn, vila och stresshantering hit.',r:['Kör, kurs eller förening','Några nära vänner räcker långt','Digitala kontakter när det behövs'],km:'Seniorträffar, volontärer, dagverksamhet, anhörigstöd.'},
+{t:'Koll på värden',d:'Hjärt- och kärlhälsa: blodtryck, blodfetter, blodsocker och vikt, och att inte röka.',r:['Kontrollera värdena regelbundet hos husläkaren','Ta ordinerade mediciner och sluta inte utan att fråga läkaren'],km:'Förebyggande hembesök och samverkan med primärvården. Ofta det svåraste att få till.'},
+{t:'Senare tillägg',d:'Hörsel, syn, munhälsa, stress och sömn räknas i dag också in i hur modellen beskrivs.',r:['Ta hörsel- och synproblem på allvar','Munhälsa påverkar både kost och hälsa'],km:'Syn- och hörselinstruktör, munhälsa i hemtjänsten.'}
+];
+const UNITS=['Restauranger och matlådor','Seniorträffar','Hälsopedagog','Dagverksamhet','Förebyggande hembesök','Volontärverksamhet','Anhörigstöd','Digitala tjänster','Syn- och hörselinstruktör','Primärvården (extern)','Civilsamhälle och studieförbund (extern)'];
+const FING=['Hälsosam mat','Fysisk aktivitet','Hjärngymnastik','Sociala aktiviteter','Koll på värden'];
+const FMODEL=[[0,1,2],[2,3,10],[7,3,10],[1,5,3,6],[4,9]];
+const MUNIS=[
+{t:'Lerum',d:'Ett FINGER-team per finger. Med i hälsofrämjande enhetens verksamhetsplan sedan 2024. Startade med två planeringsdagar för all personal och en turné till vårdcentraler och folktandvård.'},
+{t:'Höganäs',d:'FINGER är utgångspunkten för allt hälsofrämjande arbete. En åttaveckorskurs med Friskis & Svettis för personer med kognitiv sjukdom, med fika och FINGER-teman efter passen.'},
+{t:'Lund',d:'FINGER ska genomsyra verksamheten från 2026. En öppen dagverksamhet för personer med lindrig kognitiv svikt – utan biståndsbeslut eller diagnos – och kognitiva ronder på vårdcentralerna.'},
+{t:'Göteborg',d:'All personal i dagverksamheten har utbildning i motiverande samtal (MI). Med metoden meny-agenda väljer seniorerna själva vilket område de vill börja med.'},
+{t:'Stenungsund',d:'Särskilt boende. En kartläggningsmall går igenom alla fem fingrar och blir en hälsofrämjande handlingsplan, kopplad till BPSD-registret.'},
+{t:'Sollentuna och Lidingö',d:'Sollentunas Hjärnhoppet är en implementeringsstudie sedan 2025. Lidingö har avslutat ett treårigt forskningsprojekt (juni 2025) där effekterna nu analyseras.'}
+];
+
+
+let state={done:{},answers:{}};
+try{const s=JSON.parse(localStorage.getItem('kvf-pub-state')||'null');if(s)state=s}catch(e){}
+const save=()=>{try{localStorage.setItem('kvf-pub-state',JSON.stringify(state))}catch(e){}};
+const $=s=>document.querySelector(s);
+const el=(tag,attrs={},html='')=>{const e=document.createElement(tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(html)e.innerHTML=html;return e};
+
+function quiz(id){
+  const wrap=el('div',{class:'quiz'});
+  const head=el('div',{class:'block'},'<h3>Testa dig själv</h3><p class="score" id="score-'+id+'"></p>');
+  wrap.append(head);
+  state.answers[id]=state.answers[id]||{};
+  QUIZ[id].forEach((it,qi)=>{
+    const box=el('div',{class:'q'},'<div><span class="label">Fråga '+(qi+1)+' av '+QUIZ[id].length+'</span><div style="font-weight:600;margin-top:4px">'+it.q+'</div></div>');
+    const opts=el('div',{class:'opts'});const fb=el('div',{class:'fb'});fb.hidden=true;
+    const render=()=>{const pick=state.answers[id][qi];
+      [...opts.children].forEach((b,i)=>{b.className='';b.disabled=pick!==undefined;
+        if(pick!==undefined){if(i===it.a)b.className='right';else if(i===pick)b.className='wrong'}});
+      if(pick!==undefined){fb.hidden=false;fb.innerHTML='<b>'+(pick===it.a?'Rätt. ':'Inte riktigt. ')+'</b>'+it.e}};
+    it.o.forEach((o,i)=>{const b=el('button',{type:'button',id:'q-'+id+'-'+qi+'-'+i},o);
+      b.onclick=()=>{state.answers[id][qi]=i;render();updateScore(id);save()};opts.append(b)});
+    box.append(opts,fb);wrap.append(box);render();
+  });
+  const reset=el('button',{type:'button',class:'chip',id:'reset-'+id},'Börja om testet');
+  reset.onclick=()=>{state.answers[id]={};state.done[id]=false;save();show(id)};
+  wrap.append(reset);
+  return wrap;
+}
+function updateScore(id){
+  const a=state.answers[id]||{};const n=Object.keys(a).length;const tot=QUIZ[id].length;
+  const right=Object.entries(a).filter(([qi,v])=>QUIZ[id][qi].a===v).length;
+  const s=$('#score-'+id);if(s)s.textContent=n?`${right} av ${tot} rätt`+(n<tot?` · ${tot-n} kvar`:''):'Välj ett svar för att se förklaringen.';
+  if(n===tot&&!state.done[id]){state.done[id]=true;save();tabsRender();prog()}
+}
+function picker(items,cls,render){
+  const box=el('div',{class:'block '+(cls||'')});const chips=el('div',{class:'chips'});const out=el('div',{class:'detail'});
+  items.forEach((it,i)=>{const c=el('button',{type:'button',class:'chip','aria-pressed':i===0?'true':'false',id:cls+'-chip-'+i},it.k?it.k+' · '+it.t:it.t);
+    c.onclick=()=>{[...chips.children].forEach(x=>x.setAttribute('aria-pressed','false'));c.setAttribute('aria-pressed','true');out.innerHTML=render(it)};chips.append(c)});
+  out.innerHTML=render(items[0]);box.append(chips,out);return box;
+}
+function cycleSvg(){
+  const box=el('div',{class:'block'});const W=520,H=440,cx=260,cy=215,R=160;
+  let g='<svg class="cycle" viewBox="0 0 '+W+' '+H+'" role="group" aria-label="Förbättringscykeln"><circle class="ring" cx="'+cx+'" cy="'+cy+'" r="'+R+'"/><text class="center" x="'+cx+'" y="'+(cy-4)+'">5 kap SOSFS 2011:9</text><text class="center" x="'+cx+'" y="'+(cy+14)+'">klicka på ett steg</text>';
+  CYCLE.forEach((c,i)=>{const a=-Math.PI/2+i*2*Math.PI/CYCLE.length;const x=cx+R*Math.cos(a),y=cy+R*Math.sin(a);
+    const words=c.t.split(' ');const lines=words.length>2?[words[0],words.slice(1).join(' ')]:words.length===2&&c.t.length>14?[words[0],words[1]]:[c.t];
+    g+='<g tabindex="0" role="button" data-i="'+i+'" aria-pressed="'+(i===0)+'"><circle class="node" cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="52"/>'+
+    lines.map((l,li)=>'<text x="'+x.toFixed(1)+'" y="'+(y+4+(li-(lines.length-1)/2)*15).toFixed(1)+'">'+l+'</text>').join('')+'</g>'});
+  g+='</svg>';box.innerHTML=g;const out=el('div',{class:'detail'});box.append(out);
+  const set=i=>{box.querySelectorAll('g[data-i]').forEach(n=>n.setAttribute('aria-pressed',n.dataset.i==i));const c=CYCLE[i];
+    out.innerHTML='<h3>'+c.t+'</h3><p>'+c.d+'</p><p><span class="tag">Exempel</span><br>'+c.ex+'</p>'};
+  box.querySelectorAll('g[data-i]').forEach(n=>{n.onclick=()=>set(n.dataset.i);n.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();set(n.dataset.i)}}});
+  set(0);return box;
+}
+function nextBtn(id){const i=MODS.findIndex(m=>m.id===id);if(i>=MODS.length-1)return '';return '<button type="button" class="next" data-next="'+MODS[i+1].id+'">Nästa: '+MODS[i+1].name.replace(/^\d+\. /,'')+'</button>'}
+
+const VIEWS={
+ledning(){const s=el('section',{class:'mod'});
+  s.append(el('div',{class:'block'},'<span class="eyebrow">Modul 1</span><h2>Vad är ett ledningssystem?</h2><p>Ett ledningssystem är verksamhetens sätt att planera, leda, kontrollera, följa upp, utvärdera och förbättra kvaliteten. Kravet finns i socialtjänstlagen, LSS och hälso- och sjukvårdslagen, och detaljerna står i Socialstyrelsens föreskrifter SOSFS 2011:9.</p><p>Föreskriften gäller fortfarande. Den har ändrats flera gånger, senast genom HSLF-FS 2025:21, som anpassade hänvisningarna till den nya socialtjänstlagen (2025:400) från 1 juli 2025.</p>'));
+  s.append(fig(svgHouse(),'Tänk på ledningssystemet som ett hus. Lagen och föreskriften är grunden, förbättringsarbetet är golvet som håller allt i skick, processer, rutiner och ansvar är pelarna – och taket är målet: god kvalitet för brukaren.'));
+  const p=el('div',{class:'panel block'},'<h3>Föreskriften kapitel för kapitel</h3><p class="note">Klicka på ett kapitel.</p>');
+  p.append(picker(CHAPTERS,'chap',c=>'<span class="tag">'+c.k+'</span><h3>'+c.t+'</h3><p>'+c.d+'</p>'));s.append(p);
+  s.append(el('div',{class:'block'},'<h3>Process eller rutin?</h3><p>Det här är de två ord som oftast blandas ihop. En <b>process</b> är hela kedjan, från att ett uppdrag kommer in till att det följs upp. En <b>rutin</b> zoomar in på ett av stegen och beskriver hur det görs och vem som ansvarar.</p>'));
+  s.append(fig(svgProcess(),'Exempel från en LSS-verksamhet. Den markerade aktiviteten har en egen rutin. Varje steg i processen kan ha sin rutin.'));
+  s.append(el('div',{class:'block'},'<h3>Från lag till vardag</h3><div class="tscroll"><table><thead><tr><th>Nivå</th><th>Exempel</th><th>Vem</th></tr></thead><tbody>'+
+  '<tr><td>Lag</td><td>SoL och LSS kräver god kvalitet och systematisk utveckling</td><td>Riksdagen</td></tr>'+
+  '<tr><td>Föreskrift</td><td>SOSFS 2011:9 säger hur ledningssystemet ska byggas</td><td>Socialstyrelsen</td></tr>'+
+  '<tr><td>Ledningssystem</td><td>Kommunens processer, rutiner och ansvarsfördelning, ofta i Stratsys eller Hypergene</td><td>Nämnd och förvaltning</td></tr>'+
+  '<tr><td>Rutin</td><td>Hur en genomförandeplan upprättas och följs upp</td><td>Enhetschef, kvalitetssamordnare</td></tr>'+
+  '<tr><td>Vardag</td><td>Du dokumenterar i Lifecare och följer rutinen</td><td>Medarbetare</td></tr></tbody></table></div>'+
+  '<p class="note">Tillsynen görs av IVO, som granskar att verksamheten har och använder sitt ledningssystem.</p>'));
+  s.append(glossary());
+  s.append(quiz('ledning'));s.insertAdjacentHTML('beforeend',nextBtn('ledning'));return s},
+forbattring(){const s=el('section',{class:'mod'});
+  s.append(el('div',{class:'block'},'<span class="eyebrow">Modul 2</span><h2>Förbättringscykeln</h2><p>Kapitel 5 är motorn i ledningssystemet. Det beskriver sex delar som tillsammans gör att verksamheten lär sig av det som händer och förebygger det som kan hända. Det är här en kvalitetssamordnare lägger mest tid.</p>'));
+  s.append(el('div',{class:'block'},'<h3>Före, efter och hela tiden</h3><p>Det enklaste sättet att hålla isär verktygen är att fråga: <b>när</b> används det? Riskanalysen kommer före något händer, avvikelser och klagomål efter, och egenkontrollen pågår hela tiden.</p>'));
+  s.append(fig(svgTimeline(),'Pilen överst är poängen: det som händer ska leda till bättre rutiner, så att samma sak inte händer igen.'));
+  s.append(el('div',{class:'block'},'<h3>Cykelns sex delar</h3><p>Klicka på ett steg för att läsa mer och se ett exempel.</p>'));
+  s.append(cycleSvg());
+  s.append(el('div',{class:'panel block'},'<h3>Förbättra i små steg: PDSA</h3><p>Många kommuner arbetar med förbättringshjulet <b>Planera – Gör – Studera – Agera</b>. Testa en förändring i liten skala, mät, lär och justera innan den sprids. Det passar ett pilotprojekt, t.ex. när en kommun inför FINGER-modellen.</p>'));
+  s.append(fig(svgPDSA(),'Hjulet snurrar medsols. Varje varv är ett litet test: lyckas det, sprid det; misslyckas det, justera och testa igen.'));
+  s.append(quiz('forbattring'));s.insertAdjacentHTML('beforeend',nextBtn('forbattring'));return s},
+kommun(){const s=el('section',{class:'mod'});
+  s.append(el('div',{class:'block'},'<span class="eyebrow">Modul 3</span><h2>Så gör kommunerna</h2><p>Föreskriften säger vad som ska finnas. Varje nämnd beslutar sedan en egen riktlinje för hur det ska gå till. Uppsala socialnämnd (juni 2026) och Borlänges omsorgsnämnd och social- och arbetsmarknadsnämnd (juni 2026) har båda nya riktlinjer, och de liknar varandra mycket.</p>'));
+  s.append(fig(svgOrg(),'Uppdraget går nedåt och uppföljningen uppåt. Kvalitetssamordnaren är ingen egen nivå, utan ett stöd som arbetar med cheferna på alla nivåer.'));
+  const p=el('div',{class:'panel block'},'<h3>Vem ansvarar för vad?</h3><p class="note">Klicka på en roll.</p>');
+  p.append(picker(ROLES,'role',c=>'<h3>'+c.t+'</h3><p>'+c.d+'</p><p><span class="tag">Källa</span><br>'+c.s+'</p>'));s.append(p);
+  const wf=fig(svgWheel(),'Exempel på ett årshjul. Månaderna varierar mellan kommuner, men rytmen är densamma.');
+  wf.insertAdjacentHTML('beforeend','<ol class="legend"><li>Kvalitetsberättelse och ledningens genomgång för förra året</li><li>Patientsäkerhetsberättelse, senast 1 mars</li><li>Sammanställning av förbättringsarbetet till nämnden, minst två gånger per år</li></ol>');
+  s.append(el('div',{class:'block'},'<h3>Årshjulet</h3><p>Kvalitetsarbetet följer en årsrytm. Det mesta pågår löpande, men vissa saker har fasta tider.</p>'));
+  s.append(wf);
+  s.append(el('div',{class:'block'},'<h3>Kvalitetsårets rytm</h3><div class="tscroll"><table><thead><tr><th>När</th><th>Vad</th><th>Till vem</th></tr></thead><tbody>'+
+  '<tr><td>Löpande</td><td>Avvikelser, synpunkter och lex Sarah-rapporter tas emot och utreds</td><td>Ansvarig chef, nämnden (lex Sarah)</td></tr>'+
+  '<tr><td>Löpande</td><td>Riskanalys, särskilt inför förändringar och nya arbetssätt</td><td>Alla nivåer; övergripande risker i ett riskregister (Uppsala)</td></tr>'+
+  '<tr><td>Planerat</td><td>Egenkontroll: resultatuppföljning, jämförelser, dokumentationsgranskning, brukarundersökningar</td><td>Enhetschef, förvaltningsledning</td></tr>'+
+  '<tr><td>Minst 2 ggr/år</td><td>Sammanställning av förbättringsarbetet (Uppsala)</td><td>Ledningsgrupp och nämnd</td></tr>'+
+  '<tr><td>1 mars</td><td>Patientsäkerhetsberättelse (hälso- och sjukvård)</td><td>Vårdgivaren</td></tr>'+
+  '<tr><td>Årligen</td><td>Kvalitetsberättelse: arbete, brister, risker och utvecklingsområden</td><td>Medarbetare, ledningsgrupp och nämnd</td></tr>'+
+  '<tr><td>Årligen</td><td>Ledningens genomgång: fungerar ledningssystemet, och vad ska förbättras?</td><td>Ledningsgruppen</td></tr></tbody></table></div>'+
+  '<p class="note">Uppsala delar in sitt arbete i styr- och ledningsprocesser, verksamhetsprocesser och stödprocesser, och samlar styrdokument i ett kommungemensamt kvalitetsledningsstöd (KLS). Andra kommuner använder system som Stratsys eller Hypergene för samma sak.</p>'));
+  const ck=el('div',{class:'panel block'},'<h3>Självskattning: Socialstyrelsens checklista</h3><p>Tänk på din egen arbetsplats och bedöm varje punkt. Det är så en kvalitetssamordnare börjar: med en nulägesbild.</p>');
+  state.check=state.check||{};const sum=el('p',{class:'score'});
+  const lbl=['Uppfyllt','Delvis','Ej uppfyllt'];
+  const upd=()=>{const v=Object.values(state.check);const c=[0,1,2].map(x=>v.filter(y=>y===x).length);
+    sum.textContent=v.length?`${c[0]} uppfyllda · ${c[1]} delvis · ${c[2]} ej uppfyllda`+(v.length<CHECK.length?` · ${CHECK.length-v.length} kvar`:'')+(v.length===CHECK.length?(c[2]+c[1]?' – punkterna som inte är uppfyllda är dina förbättringsområden.':' – starkt!'):''):'Ingen punkt bedömd än.'};
+  CHECK.forEach((q,i)=>{const row=el('div',{class:'block'},'<div style="font-size:15px"><b>'+(i+1)+'.</b> '+q+'</div>');const ch=el('div',{class:'chips'});
+    lbl.forEach((l,j)=>{const b=el('button',{type:'button',class:'chip',id:'ck-'+i+'-'+j,'aria-pressed':state.check[i]===j?'true':'false'},l);
+      b.onclick=()=>{state.check[i]=j;[...ch.children].forEach((x,k)=>x.setAttribute('aria-pressed',k===j?'true':'false'));save();upd()};ch.append(b)});
+    row.append(ch);ck.append(row)});
+  ck.append(sum);upd();s.append(ck);
+  const sk=el('div',{class:'panel block'},'<h3>Ny socialtjänstlag: uppdatera ledningssystemet</h3><p>SKR publicerade i september 2026 ett stöd för hur kommuner ska se över ledningssystemet efter den nya socialtjänstlagen (2025:400). Klicka på ett område.</p>');
+  sk.append(picker(SKR,'skr',c=>'<h3>'+c.t+'</h3><p>'+c.d+'</p>'));
+  sk.append(el('p',{class:'note'},'Ett exempel: ett FINGER-program är ett förebyggande, kunskapsbaserat arbetssätt – precis det lagen vill se mer av – och det behöver byggas in i ledningssystemet och följas upp.'));
+  s.append(sk);
+  s.append(quiz('kommun'));s.insertAdjacentHTML('beforeend',nextBtn('kommun'));return s},
+ova(){const s=el('section',{class:'mod'});state.ova=state.ova||{j:0,w:{},st:[3,0,5,2,4,1]};
+  s.append(el('div',{class:'block'},'<span class="eyebrow">Modul 4</span><h2>Öva i praktiken</h2><p>Fyra övningar som liknar det en kvalitetssamordnare gör i vardagen. Modulen räknas som klar när avvikelsens resa är genomförd, årshjulet stämmer och styrdokumenten ligger i rätt ordning.</p>'));
+  const J=el('div',{class:'panel block'},'<h3>Övning 1: Avvikelsens resa</h3><p>'+SCEN+'</p>');const jb=el('div',{class:'quiz'});const jsv=el('div');J.append(jsv,jb);
+  const rj=()=>{jsv.innerHTML=svgJourney(state.ova.j);jb.innerHTML='';JOURNEY.forEach((st,i)=>{if(i>state.ova.j)return;
+    const q=el('div',{class:'q'},'<span class="label">Steg '+(i+1)+' av '+JOURNEY.length+' · '+st.h+'</span><div style="font-weight:600">'+st.q+'</div>');
+    if(i<state.ova.j){q.append(el('div',{class:'fb'},'<b>'+st.o[st.a]+'.</b> '+st.e))}
+    else{const opts=el('div',{class:'opts'});const fb=el('div',{class:'fb'});fb.hidden=true;
+      st.o.forEach((o,k)=>{const b=el('button',{type:'button',id:'j-'+i+'-'+k},o);
+        b.onclick=()=>{if(k===st.a){state.ova.j=i+1;save();rj();chkOva()}else{b.className='wrong';fb.hidden=false;fb.innerHTML='<b>Inte riktigt.</b> '+st.x}};opts.append(b)});
+      q.append(opts,fb)}
+    jb.append(q)});
+    if(state.ova.j>=JOURNEY.length){jb.append(el('p',{class:'score'},'Klart. Avvikelsen har gått hela vägen från upptäckt till lärande.'));
+      const r=el('button',{type:'button',class:'chip',id:'j-reset'},'Gör om övningen');r.onclick=()=>{state.ova.j=0;save();rj()};jb.append(r)}};
+  rj();s.append(J);
+  const W=el('div',{class:'panel block'},'<h3>Övning 2: Bygg årshjulet</h3><p>När görs aktiviteterna? Välj för varje rad och rätta sedan.</p>');
+  const wt=el('div',{class:'tscroll'});const tb=el('table',{},'<thead><tr><th>Aktivitet</th><th>När</th></tr></thead>');const tbody=el('tbody');
+  const sels=WHEEL.map((w,i)=>{const tr=el('tr',{},'<td>'+w.t+'</td>');const td=el('td');const sel=el('select',{id:'wh-'+i,'aria-label':'När: '+w.t},'<option value="">Välj…</option>'+WOPT.map(o=>'<option'+(state.ova.w[i]===o?' selected':'')+'>'+o+'</option>').join(''));
+    sel.onchange=()=>{state.ova.w[i]=sel.value;sel.className='';save()};td.append(sel);tr.append(td);tbody.append(tr);return sel});
+  tb.append(tbody);wt.append(tb);W.append(wt);const wres=el('p',{class:'score'});
+  const wc=el('button',{type:'button',class:'next',id:'wh-check'},'Rätta årshjulet');
+  wc.onclick=()=>{let r=0;sels.forEach((sel,i)=>{const ok=sel.value===WHEEL[i].a;if(ok)r++;sel.className=sel.value?(ok?'right':'wrong'):''});
+    wres.textContent=r+' av '+WHEEL.length+' rätt'+(r===WHEEL.length?'. Snyggt.':'. Rätta de röda och försök igen.');state.ova.wok=r===WHEEL.length;save();chkOva()};
+  W.append(wc,wres);s.append(W);
+  const S=el('div',{class:'panel block'},'<h3>Övning 3: Styrdokumentens trappa</h3><p>Ordna från det mest övergripande (överst) till det mest detaljerade (nederst).</p>');
+  const sl=el('div',{class:'stair'});const sres=el('p',{class:'score'});
+  const rs=()=>{sl.innerHTML='';state.ova.st.forEach((idx,pos)=>{const it=STAIR[idx];const row=el('div',{class:'srow'},'<span class="lvl"><b>'+it.t+'</b><br><span class="note">'+(state.ova.sok?it.d:'')+'</span></span>');
+    const up=el('button',{type:'button',class:'mini',id:'st-up-'+pos,'aria-label':'Flytta upp '+it.t},'↑');const dn=el('button',{type:'button',class:'mini',id:'st-dn-'+pos,'aria-label':'Flytta ned '+it.t},'↓');
+    up.disabled=pos===0;dn.disabled=pos===STAIR.length-1;
+    up.onclick=()=>{const a=state.ova.st;[a[pos-1],a[pos]]=[a[pos],a[pos-1]];state.ova.sok=false;save();rs()};
+    dn.onclick=()=>{const a=state.ova.st;[a[pos+1],a[pos]]=[a[pos],a[pos+1]];state.ova.sok=false;save();rs()};
+    row.append(up,dn);sl.append(row)})};
+  const sc=el('button',{type:'button',class:'next',id:'st-check'},'Rätta ordningen');
+  sc.onclick=()=>{const ok=state.ova.st.every((v,i)=>v===i);state.ova.sok=ok;save();rs();
+    sres.textContent=ok?'Rätt ordning. Lag och föreskrift beslutas nationellt; policy, riktlinje, rutin och instruktion är kommunens egna.':'Inte riktigt än. Tänk: vem beslutar dokumentet, och hur detaljerat är det?';chkOva()};
+  const sfig=el('div');const showStair=()=>{sfig.innerHTML='';if(state.ova.sok)sfig.append(fig(svgStair(),'Ju längre ned, desto fler dokument och desto mer detaljerade. De blå beslutas nationellt, resten av kommunen själv.'))};
+  const oc=sc.onclick;sc.onclick=()=>{oc();showStair()};
+  rs();showStair();S.append(sl,sc,sres,sfig);s.append(S);
+  s.append(el('div',{class:'block'},'<h3>Övning 4: Läs en processkarta</h3><p>Ett påhittat exempel på hur en processkarta för en FINGER-pilot kan se ut. Varje process har en typ, en rutin och någon som följer upp. Fundera: var finns risker, och vad skulle du följa upp?</p><div class="tscroll"><table><thead><tr><th>Process</th><th>Typ</th><th>Styrs av</th><th>Följs upp av</th></tr></thead><tbody>'+
+  PROC.map(r=>'<tr>'+r.map(c=>'<td>'+c+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>'+
+  '<p class="note">Lägg märke till hur många rader som hamnar hos kvalitetssamordnaren. Det är rollens kärna: att hålla ihop helheten och följa upp.</p>'));
+  return s},
+finger(){const s=el('section',{class:'mod finger'});
+  s.append(el('div',{class:'block'},'<span class="eyebrow">Modul 5</span><h2>FINGER-modellen</h2><p>FINGER (Finnish Geriatric Intervention Study to Prevent Cognitive Impairment and Disability) visade 2015 att flera livsstilsförändringar samtidigt kan skydda hjärnan hos äldre med förhöjd risk för demens. Studien leddes av Miia Kivipelto vid Karolinska Institutet och publicerades i The Lancet.</p>'));
+  s.append(el('div',{class:'facts'},[['1 260','deltagare'],['60–77','år gamla'],['2','års intervention'],['+25 %','kognition totalt'],['+83 %','exekutiva funktioner'],['+150 %','processhastighet']].map(f=>'<div class="fact"><b>'+f[0]+'</b><span>'+f[1]+'</span></div>').join('')));
+  s.append(fig(svgBars(),'Hur mycket bättre interventionsgruppen presterade än kontrollgruppen på de kognitiva testerna efter två år (Karolinska Institutet, 2015). Huvudanalysen visade ingen effekt på minnet.'));
+  s.append(el('div',{class:'block'},'<h3>En hand att komma ihåg</h3><p>Namnet gör det lätt: tänk på en hand. Varje finger är ett område, och effekten kommer av att alla används samtidigt – precis som en hand behöver alla fingrar för att greppa.</p>'));
+  s.append(fig(svgHand(),'De fem ursprungliga områdena. I dag räknas också hörsel, syn, munhälsa, stress och sömn in.'));
+  s.append(el('div',{class:'block'},'<h3>Aldrig för tidigt, aldrig för sent</h3><p>Omkring 45 % av demensfallen kopplas till faktorer vi kan påverka. Sjukdomsprocessen kan börja 20–30 år innan diagnosen, så förebyggande arbete lönar sig länge.</p>'));
+  s.append(fig(svgLife(),'Därför riktar sig kommunernas FINGER-arbete både till friska seniorer och till personer med lätta besvär.'));
+  const p=el('div',{class:'panel block'},'<h3>Komponenterna – och hur kommunen kan arbeta med dem</h3><p class="note">Klicka på ett område.</p>');
+  p.append(picker(FCOMP,'finger',c=>'<h3>'+c.t+'</h3><p>'+c.d+'</p><span class="tag">Praktiska råd</span><ul style="margin:4px 0 12px;padding-left:18px">'+c.r.map(x=>'<li>'+x+'</li>').join('')+'</ul><p><span class="tag">I kommunen</span><br>'+c.km+'</p>'));s.append(p);
+  s.append(el('div',{class:'block'},'<h3>Varför det är aktuellt nu</h3><p>Minst 45 % av demensfallen kopplas till påverkbara faktorer enligt Lancet-kommissionen 2024. Regeringen satsar 2026 drygt 58 miljoner kronor på demensvård och förebyggande hjärnhälsa, där spridning av FINGER-modellen är en kärna. Flera kommuner i Stockholms län har egna program, t.ex. Hjärnhoppet i Sollentuna och Träna hjärna i Lidingö. Ett FINGER-nätverk för kommuner drivs av FBHI tillsammans med Karolinska Institutet, Svenskt Demenscentrum och Lidingö stad.</p>'+
+  '<p><b>Kopplingen till kommunens vardag:</b> Ett område för förebyggande och sociala insatser har ofta redan många av byggstenarna – restauranger, seniorträffar, hälsopedagog, dagverksamhet, förebyggande hembesök och syn- och hörselinstruktör. Pilotprojektets uppgift är att knyta ihop dem till ett samlat, kunskapsbaserat arbetssätt och följa upp effekten.</p>'));
+  s.append(fingerKommun());s.append(fingerMap());
+  s.append(quiz('finger'));s.insertAdjacentHTML('beforeend',nextBtn('finger'));return s},
+intervju(){const s=el('section',{class:'mod'});
+  s.append(el('div',{class:'block'},'<span class="eyebrow">Modul 6</span><h2>Källor och vidare läsning</h2><p>Allt i materialet bygger på offentliga källor. Läs originalen – föreskrifter och riktlinjer ändras, och det är alltid den gällande versionen som gäller.</p><p class="note">Sammanställt av Tushar Hossain, november 2026. Ett fritt studiematerial, inte ett officiellt utbildningsmaterial från någon myndighet eller kommun.</p>'));
+  if(!state.done.intervju){state.done.intervju=true;save();setTimeout(()=>{tabsRender('intervju');prog()},0)}
+  s.append(el('div',{class:'block'},'<h3>Källor</h3><ul class="src">'+
+  '<li><a href="https://www.socialstyrelsen.se/kunskapsstod-och-regler/regler-och-riktlinjer/foreskrifter-och-allmanna-rad/konsoliderade-foreskrifter/20119-om-ledningssystem-for-systematiskt-kvalitetsarbete/" target="_blank" rel="noopener">Socialstyrelsen: SOSFS 2011:9, konsoliderad version</a></li>'+
+  '<li><a href="https://www.socialstyrelsen.se/kunskapsstod-och-regler/regler-och-riktlinjer/Ledningssystem/" target="_blank" rel="noopener">Socialstyrelsen: Ledningssystem för systematiskt kvalitetsarbete</a></li>'+
+  '<li><a href="https://kunskapsguiden.se/omraden-och-teman/verksamhetsutveckling/ledningssystem-for-systematiskt-kvalitetsarbete/lagstiftning-som-staller-krav-pa-ledningssystem/" target="_blank" rel="noopener">Kunskapsguiden: Lagstiftning som ställer krav på ledningssystem</a></li>'+
+  '<li><a href="https://kunskapsguiden.se/globalassets/globala-block/verksamhetsutveckling/ledningssystem-for-systematiskt-kvalitetsarbete/checklista-ledningssystem-systematiskt-kvalitetsarbete.pdf" target="_blank" rel="noopener">Kunskapsguiden: Checklista för ledningssystem</a></li>'+
+  '<li><a href="https://extra.skr.se/framtidenssocialtjanst/kunskapochstod/kunskapsbaseradsocialtjanst/uppdateraledningssystem.97254.html" target="_blank" rel="noopener">SKR: Uppdatera ledningssystemet (ny socialtjänstlag)</a></li>'+
+  '<li><a href="https://www.uppsala.se/contentassets/6e0c81ebfff84b17bcddaf4e1c8e7128/riktlinje-for-socialnamndens-ledningssystem-for-systematiskt-kvalitetsarbete.pdf" target="_blank" rel="noopener">Uppsala kommun: Riktlinje för socialnämndens ledningssystem (2026)</a></li>'+
+  '<li><a href="https://www.borlange.se/download/18.20c2c85d19eb7a927aa1ee4c/1782465110439/Riktlinje%20f%C3%B6r%20till%C3%A4mpning%20av%20SOSFS%202011:9.pdf" target="_blank" rel="noopener">Borlänge kommun: Riktlinje för tillämpning av SOSFS 2011:9 (2026)</a></li>'+
+  '<li><a href="https://news.ki.se/brain-training-and-healthy-lifestyle-may-slow-down-cognitive-decline" target="_blank" rel="noopener">Karolinska Institutet: FINGER-studiens resultat (2015)</a></li>'+
+  '<li><a href="https://stockholmssjukhem.se/aktuellt/miia-kivipelto-om-regeringens-stora-satsning-pa-finger/" target="_blank" rel="noopener">Stockholms Sjukhem: Regeringens satsning på FINGER</a></li>'+
+  '<li><a href="https://fbhi.se/finger-for-kommuner-vardgivare-och-beslutsfattare/" target="_blank" rel="noopener">FBHI: FINGER för kommuner</a></li>'+
+  '<li><a href="https://www.sollentuna.se/finger" target="_blank" rel="noopener">Sollentuna: FINGER-modellen och Hjärnhoppet</a></li>'+
+  '<li><a href="https://fbhi.se/sv/finger-modellen/" target="_blank" rel="noopener">FBHI: FINGER-modellen</a></li>'+
+  '<li><a href="https://demenscentrum.se/sites/default/files//dokument/SDC_publicerat/hjarnhalsa_i_fokus_med_finger-modellen.pdf" target="_blank" rel="noopener">Svenskt Demenscentrum och FBHI: Hjärnhälsa i fokus med FINGER-modellen</a></li>'+
+  '<li><a href="https://goteborgsregionen.se/kunskapsbank/erfarenhetsutbyteomfingermodellen.5.370d38eb19e634f163a980.html" target="_blank" rel="noopener">Göteborgsregionen: Erfarenhetsutbyte om FINGER-modellen</a></li></ul>'));
+  return s}
+};
+function tabsRender(cur){
+  const t=$('#tabs');cur=cur||t.dataset.cur||MODS[0].id;t.dataset.cur=cur;t.innerHTML='';
+  MODS.forEach(m=>{const b=el('button',{type:'button',role:'tab','aria-selected':m.id===cur,id:'tab-'+m.id,class:state.done[m.id]?'done':''},'<span class="dot"></span>'+m.name);
+    b.onclick=()=>{show(m.id);window.scrollTo({top:0})};t.append(b)});
+}
+function prog(){const n=MODS.filter(m=>state.done[m.id]).length;$('#bar').style.width=(n/MODS.length*100)+'%';$('#progtext').textContent=n+' av '+MODS.length+' moduler klara'}
+function chkOva(){const o=state.ova||{};if(!state.done.ova&&o.j>=JOURNEY.length&&o.wok&&o.sok){state.done.ova=true;save();tabsRender();prog()}}
+function show(id){
+  const m=$('#main');m.innerHTML='';m.append(VIEWS[id]());tabsRender(id);
+  if(SUMMARY[id]){const qz=m.querySelector('.quiz');const sb=el('div',{class:'summary'},'<span class="label">Kort sagt</span><p style="margin:4px 0 0">'+SUMMARY[id]+'</p>');if(qz)qz.before(sb)}
+  if(GOALS[id]){const sec=m.firstChild;const gb=el('div',{class:'goals'},'<span class="label">Efter modulen kan du</span><ul>'+GOALS[id].map(g=>'<li>'+g+'</li>').join('')+'</ul>');sec.children[0].after(gb)}
+  if(QUIZ[id])updateScore(id);
+  m.querySelectorAll('[data-next]').forEach(b=>b.onclick=()=>{show(b.dataset.next);window.scrollTo({top:0})});
+  try{localStorage.setItem('kvf-pub-tab',id)}catch(e){}
+}
+let start='ledning';try{start=localStorage.getItem('kvf-pub-tab')||'ledning'}catch(e){}
+if(!VIEWS[start])start='ledning';
+show(start);prog();
+</script>
